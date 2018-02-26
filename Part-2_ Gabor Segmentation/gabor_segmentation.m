@@ -45,7 +45,7 @@ img      = imresize(img,resize_factor);
 img_gray = rgb2gray(img);
 
 % Display image
-figure(1), imshow(img), title(sprintf('Input image: %s', image_id));
+%figure(1), imshow(img), title(sprintf('Input image: %s', image_id));
 
 %% Design array of Gabor Filters
 % In this code section, you will create a Gabor Filterbank. A filterbank is
@@ -120,6 +120,8 @@ fprintf('--------------------------------------\n')
 fprintf('Filter bank created in %.3f seconds.\n', ctime);
 fprintf('--------------------------------------\n')
 
+
+
 %% Filter images using Gabor filter bank using quadrature pairs (real and imaginary parts)
 % You will now filter the input image with each complex Gabor filter in 
 % gaborFilterBank structure and store the output in the cell called 
@@ -134,16 +136,17 @@ fprintf('--------------------------------------\n')
 %            for padding. Find the one that works well. You might want to
 %            explain what works better and why shortly in the report.
 featureMaps = cell(length(gaborFilterBank),1);
-for jj = 1 : 1 %length(gaborFilterBank)
+for jj = 1 : length(gaborFilterBank)
     gabor_filterPairs = gaborFilterBank(jj).filterPairs;
     gabor_real = gabor_filterPairs(:, :, 1);
     gabor_imag = gabor_filterPairs(:, :, 2);
     real_out = imfilter(img_gray, gabor_real); % \\TODO: filter the grayscale input with real part of the Gabor
     imag_out = imfilter(img_gray, gabor_imag); % \\TODO: filter the grayscale input with imaginary part of the Gabor
     
-    figure, imshow(img_gray)
-    figure, imshow(real_out)
-    figure, imshow(imag_out)
+    % Display images
+    %figure(2), imshow(img_gray), title(sprintf('Input image: img_gray'));
+    %figure(3), imshow(real_out), title(sprintf('Input image: real_out'));
+    %figure(4), imshow(imag_out), title(sprintf('Input image: imag_out'));
     
     featureMaps{jj} = cat(3, real_out, imag_out);
     
@@ -166,10 +169,10 @@ end
 % \\ Hint: (real_part^2 + imaginary_part^2)^(1/2) \\
 featureMags =  cell(length(gaborFilterBank),1);
 for jj = 1:length(featureMaps)
-    real_part = featureMaps{jj}(:,:,1);
-    imag_part = featureMaps{jj}(:,:,2);
-    featureMags{jj} = (real_part.^2 + imag_part.^2).^(1/2);% \\TODO: Compute the magnitude here
-    
+    real_part = featureMaps{jj}(:, :, 1);
+    imag_part = featureMaps{jj}(:, :, 2);
+    featureMags{jj} = sqrt(double((real_part.^2 + imag_part.^2)));% \\TODO: Compute the magnitude here
+
     % Visualize the magnitude response if you wish.
     if visFlag
         figure(3), 
@@ -178,7 +181,9 @@ for jj = 1:length(featureMaps)
                                                                                                               gaborFilterBank(jj).sigma));
         pause(.3)    
     end
+    
 end
+
 
 %% Prepare and Preprocess features 
 % You can think of each filter response as a sort of feature representation
@@ -195,14 +200,19 @@ features = zeros(numRows, numCols, length(featureMags));
 if smoothingFlag
     % \\TODO:
     %FOR_LOOP
+    for jj = 1:length(featureMags)        
         % i)  filter the magnitude response with appropriate Gaussian kernels
+        smoothed_magn = imgaussfilt(featureMags{jj}, gaborFilterBank(jj).sigma);
+
         % ii) insert the smoothed image into features(:,:,jj)
+        features(:, :, jj) = smoothed_magn;
+    end
     %END_FOR
 else
     % Don't smooth but just insert magnitude images into the matrix
     % called features.
     for jj = 1:length(featureMags)
-        features(:,:,jj) = featureMags{jj};
+        features(:, :, jj) = featureMags{jj};
     end
 end
 
@@ -211,20 +221,21 @@ end
 % [numRows, numCols, numFilters] into a matrix of size [numRows*numCols, numFilters]
 % This will constitute our data matrix which represents each pixel in the 
 % input image with numFilters features.  
-features = reshape(features, numRows * numCols, []);
+features = reshape(features, numRows * numCols, []); % 124848x36 matrix
 
 
 % Standardize features. 
 % \\ Hint: see http://ufldl.stanford.edu/wiki/index.php/Data_Preprocessing
 %          for more information. \\
-
-features = 1;% \\ TODO: i)  Implement standardization on matrix called features. 
-           %          ii) Return the standardized data matrix.
+% \\ TODO: i)  Implement standardization on matrix called features. 
+%          ii) Return the standardized data matrix.
+features = (features - mean(features)) / std(features); % 124848x36 matrix
 
 
 % (Optional) Visualize the saliency map using the first principal component 
 % of the features matrix. It will be useful to diagnose possible problems 
 % with the pipeline and filterbank.  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%ERROR!
 coeff = pca(features);
 feature2DImage = reshape(features*coeff(:,1),numRows,numCols);
 figure(4)
@@ -262,4 +273,5 @@ Aseg2(~BW) = img(~BW);
 figure(6)
 imshowpair(Aseg1,Aseg2,'montage')
 
-fclose all;
+%fclose all;
+fclose('all');
