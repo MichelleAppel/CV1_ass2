@@ -1,3 +1,5 @@
+clc
+
 %% Hyperparameters
 k        = 2;      % number of clusters in k-means algorithm. By default, 
                    % we consider k to be 2 in foreground-background segmentation task.
@@ -132,9 +134,17 @@ fprintf('--------------------------------------\n')
 %            for padding. Find the one that works well. You might want to
 %            explain what works better and why shortly in the report.
 featureMaps = cell(length(gaborFilterBank),1);
-for jj = 1 : length(gaborFilterBank)
-    real_out =  % \\TODO: filter the grayscale input with real part of the Gabor
-    imag_out =  % \\TODO: filter the grayscale input with imaginary part of the Gabor
+for jj = 1 : 1 %length(gaborFilterBank)
+    gabor_filterPairs = gaborFilterBank(jj).filterPairs;
+    gabor_real = gabor_filterPairs(:, :, 1);
+    gabor_imag = gabor_filterPairs(:, :, 2);
+    real_out = imfilter(img_gray, gabor_real); % \\TODO: filter the grayscale input with real part of the Gabor
+    imag_out = imfilter(img_gray, gabor_imag); % \\TODO: filter the grayscale input with imaginary part of the Gabor
+    
+    figure, imshow(img_gray)
+    figure, imshow(real_out)
+    figure, imshow(imag_out)
+    
     featureMaps{jj} = cat(3, real_out, imag_out);
     
     % Visualize the filter responses if you wish.
@@ -158,7 +168,7 @@ featureMags =  cell(length(gaborFilterBank),1);
 for jj = 1:length(featureMaps)
     real_part = featureMaps{jj}(:,:,1);
     imag_part = featureMaps{jj}(:,:,2);
-    featureMags{jj} = % \\TODO: Compute the magnitude here
+    featureMags{jj} = (real_part.^2 + imag_part.^2).^(1/2);% \\TODO: Compute the magnitude here
     
     % Visualize the magnitude response if you wish.
     if visFlag
@@ -208,7 +218,7 @@ features = reshape(features, numRows * numCols, []);
 % \\ Hint: see http://ufldl.stanford.edu/wiki/index.php/Data_Preprocessing
 %          for more information. \\
 
-features = % \\ TODO: i)  Implement standardization on matrix called features. 
+features = 1;% \\ TODO: i)  Implement standardization on matrix called features. 
            %          ii) Return the standardized data matrix.
 
 
@@ -227,7 +237,7 @@ imshow(feature2DImage,[]), title('Pixel representation projected onto first PC')
 % \\ Hint-2: use the parameter k defined in the first section when calling
 %            MATLAB's built-in kmeans function.
 tic
-pixLabels = % \\TODO: Return cluster labels per pixel
+pixLabels = 1;% \\TODO: Return cluster labels per pixel
 ctime = toc;
 fprintf('Clustering completed in %.3f seconds.\n', ctime);
 
@@ -252,5 +262,4 @@ Aseg2(~BW) = img(~BW);
 figure(6)
 imshowpair(Aseg1,Aseg2,'montage')
 
-
-
+fclose all;
