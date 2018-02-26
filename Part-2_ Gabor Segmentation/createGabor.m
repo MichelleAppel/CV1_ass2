@@ -78,15 +78,14 @@ function rotMat = generateRotationMatrix(theta)
 % ----------------------------------------------------------
 % Returns the rotation matrix. 
 % \\ Hint: https://en.wikipedia.org/wiki/Rotation_matrix \\
-rotMat = [cos(theta), -sin(theta); sin(theta), cos(theta)]; %the rotation matrix given theta.
+rotMat = [cos(theta), -sin(theta); sin(theta), cos(theta)]; % The rotation matrix given theta.
 end
 
 % ----------------------------------------------------------
 function cosCarrier = createCos(rot_x, lambda, psi)
 % ----------------------------------------------------------
 % Returns the 2D cosine carrier. 
-%cosCarrier = 1; % \\TODO: Implement the cosine given rot_x, lambda and psi.
-cosCarrier = cos(2*pi*rot_x/lambda + psi);
+cosCarrier = cos(2*pi*rot_x/lambda + psi); % The cosine given rot_x, lambda and psi.
 
 % Reshape the vector representation to matrix.
 cosCarrier = reshape(cosCarrier, sqrt(length(cosCarrier)), []);
@@ -96,7 +95,7 @@ end
 function sinCarrier = createSin(rot_x, lambda, psi)
 % ----------------------------------------------------------
 % Returns the 2D sine carrier. 
-%sinCarrier = 1% \\TODO: Implement the sine given rot_x, lambda and psi.
+% The sine given rot_x, lambda and psi.
 sinCarrier = sin(2*pi*rot_x/lambda + psi);
 
 % Reshape the vector representation to matrix.
@@ -107,8 +106,8 @@ end
 function gaussEnv = createGauss(rot_x, rot_y, gamma, sigma)
 % ----------------------------------------------------------
 % Returns the 2D Gaussian Envelope. 
-%gaussEnv = 1;% \\TODO: Implement the Gaussian envelope.
-gaussEnv = exp((rot_x^2 + gamma^2 * rot_y^2) / 2*sigma^2);
+% The Gaussian envelope.
+gaussEnv = exp((rot_x.^2 + gamma^2 * rot_y.^2) / 2*sigma^2);
 
 % Reshape the vector representation to matrix.
 gaussEnv = reshape(gaussEnv, sqrt(length(gaussEnv)), []);
