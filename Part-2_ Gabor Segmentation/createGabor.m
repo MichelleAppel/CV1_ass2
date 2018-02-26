@@ -57,10 +57,8 @@ sinCarrier = createSin(rot_x, lambda, psi);
 
 % Modulate (multiply) Gaussian envelope with the carriers to compute 
 % the real and imaginary components of the omplex Gabor filter. 
-%myGabor_real = 1;    % \\TODO: modulate gaussianEnv with cosCarrier
-%myGabor_imaginary = 1; % \\TODO: modulate gaussianEnv with sinCarrier
-myGabor_real = gaussianEnv * cosCarrier;
-myGabor_imaginary = gaussianEnv * sinCarrier;
+myGabor_real = gaussianEnv * cosCarrier; % modulate gaussianEnv with cosCarrier
+myGabor_imaginary = gaussianEnv * sinCarrier; % modulate gaussianEnv with sinCarrier
 
 % Pack myGabor_real and myGabor_imaginary into myGabor.
 myGabor(:,:,1) = myGabor_real;
@@ -78,7 +76,7 @@ function rotMat = generateRotationMatrix(theta)
 % ----------------------------------------------------------
 % Returns the rotation matrix. 
 % \\ Hint: https://en.wikipedia.org/wiki/Rotation_matrix \\
-rotMat = [cos(theta), -sin(theta); sin(theta), cos(theta)]; % The rotation matrix given theta.
+rotMat = round([cos(theta), -sin(theta); sin(theta), cos(theta)], 6) % The rotation matrix given theta.
 end
 
 % ----------------------------------------------------------
