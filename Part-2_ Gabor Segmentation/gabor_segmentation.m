@@ -11,7 +11,7 @@ image_id = 'Kobi'; % Identifier to switch between input images.
 err_msg  = 'Image not available.';
 
 % Control settings
-visFlag       = false;    %  Set to true to visualize filter responses.
+visFlag       = true;    %  Set to true to visualize filter responses.
 smoothingFlag = true;   %  Set to true to postprocess filter outputs.
 
 %% Read image
@@ -45,15 +45,14 @@ img      = imresize(img,resize_factor);
 img_gray = rgb2gray(img);
 
 % Display image
-%figure(1), imshow(img), title(sprintf('Input image: %s', image_id));
+figure(1), imshow(img), title(sprintf('Input image: %s', image_id));
 
 %% Design array of Gabor Filters
 % In this code section, you will create a Gabor Filterbank. A filterbank is
 % a collection of filters with varying properties (e.g. {shape, texture}).
 % A Gabor filterbank consists of Gabor filters of distinct orientations
 % and scales. We will use this bank to extract texture information from the
-% input image. 
-
+% input image.
 [numRows, numCols, ~] = size(img);
 
 % Estimate the minimum and maximum of the wavelengths for the sinusoidal
@@ -121,7 +120,6 @@ fprintf('Filter bank created in %.3f seconds.\n', ctime);
 fprintf('--------------------------------------\n')
 
 
-
 %% Filter images using Gabor filter bank using quadrature pairs (real and imaginary parts)
 % You will now filter the input image with each complex Gabor filter in 
 % gaborFilterBank structure and store the output in the cell called 
@@ -142,12 +140,7 @@ for jj = 1 : length(gaborFilterBank)
     gabor_imag = gabor_filterPairs(:, :, 2);
     real_out = imfilter(img_gray, gabor_real); % \\TODO: filter the grayscale input with real part of the Gabor
     imag_out = imfilter(img_gray, gabor_imag); % \\TODO: filter the grayscale input with imaginary part of the Gabor
-    
-    % Display images
-    %figure(2), imshow(img_gray), title(sprintf('Input image: img_gray'));
-    %figure(3), imshow(real_out), title(sprintf('Input image: real_out'));
-    %figure(4), imshow(imag_out), title(sprintf('Input image: imag_out'));
-    
+        
     featureMaps{jj} = cat(3, real_out, imag_out);
     
     % Visualize the filter responses if you wish.
@@ -248,10 +241,9 @@ imshow(feature2DImage,[]), title('Pixel representation projected onto first PC')
 % \\ Hint-2: use the parameter k defined in the first section when calling
 %            MATLAB's built-in kmeans function.
 tic
-pixLabels = 1;% \\TODO: Return cluster labels per pixel
+pixLabels = kmeans(features, k); % \\TODO: Return cluster labels per pixel
 ctime = toc;
 fprintf('Clustering completed in %.3f seconds.\n', ctime);
-
 
 
 % Visualize the clustering by reshaping pixLabels into original grayscale
@@ -260,7 +252,6 @@ pixLabels = reshape(pixLabels,[numRows numCols]);
 
 figure(5)
 imshow(label2rgb(pixLabels)), title('Pixel clusters');
-
 
 
 % Use the pixLabels to visualize segmentation.
