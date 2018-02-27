@@ -17,18 +17,22 @@ switch nargin
         sigma = varargin{2};        % second arg
 end
 
-imName = char(strcat('gen_images/', image(15:22), '_', ...
-    kernel_type, '_', string(kernel_size), '.jpg'));
-image = imread(image);
 
 switch kernel_type
     case 'box'
-        imOut = imboxfilt(image, kernel_size);
+        imName = char(strcat('gen_images/', image(15:22), ...
+            '_box_', string(kernel_size), '.jpg'));
+        imOut = imboxfilt(imread(image), kernel_size);
     case 'median'
-        imOut = medfilt2(image, [kernel_size kernel_size]);
+        imName = char(strcat('gen_images/', image(15:22), ...
+            '_median_', string(kernel_size), '.jpg'));
+        imOut = medfilt2(imread(image), [kernel_size kernel_size]);
     case 'gaussian'
+        imName = char(strcat('gen_images/', image(15:22), ...
+            '_gaussian_', string(kernel_size), ...
+            '_sigma_', string(sigma), '.jpg'));
         gaussFilter = gauss2D(sigma, kernel_size);
-        imOut = imfilter(image, gaussFilter);
+        imOut = imfilter(imread(image), gaussFilter);
 end
 
 imshow(imOut);
