@@ -11,7 +11,7 @@ switch LOG_type
         
     case 2
         %method 2
-        LoG1D = 
+        LoG2D = LoG2D(0.5, 5);
         
     case 3
         %method 3
