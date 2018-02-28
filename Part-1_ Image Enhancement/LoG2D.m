@@ -14,5 +14,5 @@ function G = LoG2D( sigma , kernel_size )
     end
     
     % Normalize
-    G = G./abs(sum(sum(G)));
+    %G = G./abs(sum(sum(G)));
 end

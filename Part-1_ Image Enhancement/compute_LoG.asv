@@ -1,5 +1,4 @@
 function imOut = compute_LoG(image, LOG_type)
-image = imread(image);
 
 switch LOG_type
     case 1
@@ -20,10 +19,10 @@ switch LOG_type
     case 3
         % method 3: Taking the Difference of two Gaussians (DoG) computed at different
         % scales sigma1 and sigma2.
-        G2D1 = gauss2D(0., 11);
+        G2D1 = gauss2D(0.3, 11);
         im1 = imfilter(image, G2D1, 'conv');
         
-        G2D2 = gauss2D(0.2, 11);
+        G2D2 = gauss2D(20, 101);
         im2 = imfilter(image, G2D2, 'conv');
         
         imOut = im1 - im2;
