@@ -3,7 +3,7 @@ clc
 %% Hyperparameters
 k        = 2;      % number of clusters in k-means algorithm. By default, 
                    % we consider k to be 2 in foreground-background segmentation task.
-image_id = 'Robin-2'; % Identifier to switch between input images.
+image_id = 'Robin-1'; % Identifier to switch between input images.
                    % Possible ids: 'Kobi',    'Polar', 'Robin-1'
                    %               'Robin-2', 'Cows'
 
@@ -59,7 +59,8 @@ figure(1), imshow(img), title(sprintf('Input image: %s', image_id));
 % carriers. 
 % ** This step is pretty much standard, therefore, you don't have to
 %    worry about it. It is cycles in pixels. **   
-lambdaMin = 4/sqrt(2);
+%lambdaMin = 4/sqrt(2); % default
+lambdaMin = 5;
 lambdaMax = hypot(numRows,numCols);
 
 % Specify the carrier wavelengths.  
@@ -68,12 +69,13 @@ n = floor(log2(lambdaMax/lambdaMin));
 lambdas = 2.^(0:(n-2)) * lambdaMin;
 
 % Define the set of orientations for the Gaussian envelope.
+%dTheta      = 2*pi/8;                  % \\ the default step size
 dTheta      = 2*pi/8;                  % \\ the step size
-orientations = 0:dTheta:(pi/2);       
+orientations = 0:dTheta:(pi/2);
 
 % Define the set of sigmas for the Gaussian envelope. Sigma here defines 
 % the standard deviation, or the spread of the Gaussian. 
-sigmas = [1,2]; 
+sigmas = [0.8, 0.9, 1, 1.1, 1.2]; 
 
 % Now you can create the filterbank. We provide you with a MATLAB struct
 % called gaborFilterBank in which we will hold the filters and their
@@ -195,8 +197,9 @@ if smoothingFlag
     % \\TODO:
     for jj = 1:length(featureMags)        
         % i)  filter the magnitude response with appropriate Gaussian kernels
-        smoothed_magn = imgaussfilt(featureMags{jj}, 0.5*k*gaborFilterBank(jj).lambda);
-
+        smooth_param = 1; % 1 = overall best value
+        smoothed_magn = imgaussfilt(featureMags{jj}, smooth_param*gaborFilterBank(jj).lambda);
+        
         % ii) insert the smoothed image into features(:,:,jj)
         features(:, :, jj) = smoothed_magn;
     end
