@@ -3,7 +3,7 @@ clc
 %% Hyperparameters
 k        = 2;      % number of clusters in k-means algorithm. By default, 
                    % we consider k to be 2 in foreground-background segmentation task.
-image_id = 'Kobi'; % Identifier to switch between input images.
+image_id = 'Robin-2'; % Identifier to switch between input images.
                    % Possible ids: 'Kobi',    'Polar', 'Robin-1'
                    %               'Robin-2', 'Cows'
 
@@ -11,7 +11,7 @@ image_id = 'Kobi'; % Identifier to switch between input images.
 err_msg  = 'Image not available.';
 
 % Control settings
-visFlag       = true;    %  Set to true to visualize filter responses.
+visFlag       = false;    %  Set to true to visualize filter responses.
 smoothingFlag = true;   %  Set to true to postprocess filter outputs.
 
 %% Read image
@@ -138,8 +138,8 @@ for jj = 1 : length(gaborFilterBank)
     gabor_filterPairs = gaborFilterBank(jj).filterPairs;
     gabor_real = gabor_filterPairs(:, :, 1);
     gabor_imag = gabor_filterPairs(:, :, 2);
-    real_out = imfilter(img_gray, gabor_real); % \\TODO: filter the grayscale input with real part of the Gabor
-    imag_out = imfilter(img_gray, gabor_imag); % \\TODO: filter the grayscale input with imaginary part of the Gabor
+    real_out = imfilter(img_gray, gabor_real, 'circular', 'corr'); % \\TODO: filter the grayscale input with real part of the Gabor
+    imag_out = imfilter(img_gray, gabor_imag, 'circular', 'corr'); % \\TODO: filter the grayscale input with imaginary part of the Gabor
         
     featureMaps{jj} = cat(3, real_out, imag_out);
     
@@ -164,7 +164,8 @@ featureMags =  cell(length(gaborFilterBank),1);
 for jj = 1:length(featureMaps)
     real_part = featureMaps{jj}(:, :, 1);
     imag_part = featureMaps{jj}(:, :, 2);
-    featureMags{jj} = sqrt(double((real_part.^2 + imag_part.^2)));% \\TODO: Compute the magnitude here
+    featureMags{jj} = sqrt(double((real_part.^2)) + ...
+        double(imag_part.^2)); % \\TODO: Compute the magnitude here
 
     % Visualize the magnitude response if you wish.
     if visFlag
@@ -192,15 +193,13 @@ end
 features = zeros(numRows, numCols, length(featureMags));
 if smoothingFlag
     % \\TODO:
-    %FOR_LOOP
     for jj = 1:length(featureMags)        
         % i)  filter the magnitude response with appropriate Gaussian kernels
-        smoothed_magn = imgaussfilt(featureMags{jj}, gaborFilterBank(jj).sigma);
+        smoothed_magn = imgaussfilt(featureMags{jj}, 0.5*k*gaborFilterBank(jj).lambda);
 
         % ii) insert the smoothed image into features(:,:,jj)
         features(:, :, jj) = smoothed_magn;
     end
-    %END_FOR
 else
     % Don't smooth but just insert magnitude images into the matrix
     % called features.
@@ -214,7 +213,7 @@ end
 % [numRows, numCols, numFilters] into a matrix of size [numRows*numCols, numFilters]
 % This will constitute our data matrix which represents each pixel in the 
 % input image with numFilters features.  
-features = reshape(features, numRows * numCols, []); % 124848x36 matrix
+features = reshape(features, numRows * numCols, []);
 
 
 % Standardize features. 
@@ -222,13 +221,13 @@ features = reshape(features, numRows * numCols, []); % 124848x36 matrix
 %          for more information. \\
 % \\ TODO: i)  Implement standardization on matrix called features. 
 %          ii) Return the standardized data matrix.
-features = (features - mean(features)) / std(features); % 124848x36 matrix
+features = bsxfun(@minus, features, mean(features));
+features = bsxfun(@rdivide, features, std(features));
 
 
 % (Optional) Visualize the saliency map using the first principal component 
 % of the features matrix. It will be useful to diagnose possible problems 
 % with the pipeline and filterbank.  
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%ERROR!
 coeff = pca(features);
 feature2DImage = reshape(features*coeff(:,1),numRows,numCols);
 figure(4)
@@ -264,5 +263,4 @@ Aseg2(~BW) = img(~BW);
 figure(6)
 imshowpair(Aseg1,Aseg2,'montage')
 
-%fclose all;
 fclose('all');
